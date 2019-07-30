@@ -13,7 +13,7 @@ fn main() {
 
     let mut run_loop = runloop::RunLoop::new();
     let mut builder = WindowBuilder::new();
-    let pane = InterpPane;
+    let pane = InterpPane::default();
     let mut col = Column::new();
     let label = DynLabel::new(|data: &AppState, _env| format!("value: {}", data.width));
     let button = Button::new("increment");
