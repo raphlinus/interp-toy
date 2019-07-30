@@ -1,9 +1,15 @@
+use std::sync::Arc;
+
+use druid::kurbo::Point;
+
 use druid::Data;
 
 #[derive(Clone, Default)]
 pub struct AppState {
     pub width: f64,
     pub weight: f64,
+
+    pub pts: Arc<Vec<Point>>,
 }
 
 impl Data for AppState {
