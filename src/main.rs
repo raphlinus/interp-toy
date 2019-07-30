@@ -5,7 +5,7 @@ use druid::{LensWrap, UiMain, UiState};
 mod app_state;
 mod interp_pane;
 
-use app_state::{AppState, lenses};
+use app_state::{lenses, AppState, InterpPt};
 use interp_pane::InterpPane;
 
 fn main() {
