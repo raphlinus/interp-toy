@@ -2,7 +2,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 
 use druid::kurbo::{Circle, Size};
-use druid::piet::{Color, FillRule, RenderContext};
+use druid::piet::{Color, RenderContext};
 use druid::{
     Action, BaseState, BoxConstraints, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx, Widget,
 };
@@ -29,8 +29,8 @@ impl Widget<AppState> for InterpPane {
         for pt in data.pts.deref() {
             let interp = pt.eval(width, weight);
             let circle = Circle::new(interp, 5.0);
-            let brush = paint_ctx.render_ctx.solid_brush(Color::WHITE);
-            paint_ctx.render_ctx.fill(circle, &brush, FillRule::NonZero);
+            let fg_color = Color::WHITE;
+            paint_ctx.render_ctx.fill(circle, &fg_color);
         }
     }
 

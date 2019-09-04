@@ -7,6 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-druid = {git = "https://github.com/xi-editor/druid", rev = "3df5e4da7475706e380973230913828149b5b91e" }
-rbf-interp = "0.1.1"
+druid = {git = "https://github.com/xi-editor/druid", rev = "8e56a17e10d323e6aaf4c8da03655db6f1a62060" }
+rbf-interp = "0.1.2"
 nalgebra = "0.18"

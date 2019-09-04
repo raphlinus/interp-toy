@@ -79,21 +79,6 @@ impl InterpPt {
 
     pub fn eval(&self, width: f64, weight: f64) -> Point {
         let len = self.samples.len();
-        if len == 1 {
-            // TODO: I think rbf-interp should handle this case, but since
-            // it tries to invert a non-invertible matrix, we work around
-            // it here.
-            return self.samples[0].pt;
-        }
-        if len == 2 {
-            // TODO: RBF-interp should deal with this too.
-            let dot = width * (self.samples[1].width - self.samples[0].width)
-                + weight * (self.samples[1].weight - self.samples[0].weight);
-            let scale = (self.samples[1].width - self.samples[0].width).powi(2) +
-                (self.samples[1].weight - self.samples[0].weight).powi(2);
-            let t = dot / scale;
-            return self.samples[0].pt.lerp(self.samples[1].pt, t);
-        }
         let mut centers = Vec::with_capacity(len);
         let mut vals = Vec::with_capacity(len);
         for sample in &self.samples {

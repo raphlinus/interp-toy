@@ -41,7 +41,7 @@ fn main() {
 
     let app_state = AppState::default();
     let state = UiState::new(root, app_state);
-    builder.set_title("Hello example");
+    builder.set_title("Interpolation toy");
     builder.set_handler(Box::new(UiMain::new(state)));
     let window = builder.build().unwrap();
     window.show();
