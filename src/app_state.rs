@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use std::sync::Arc;
 
 use nalgebra::DVector;
@@ -17,11 +18,16 @@ pub struct AppState {
     pub weight: f64,
 
     pub pts: Arc<Vec<InterpPt>>,
+
+    pub masters: Arc<Vec<Master>>,
 }
 
 impl Data for AppState {
     fn same(&self, other: &AppState) -> bool {
         self.width.same(&other.width)
+            && self.weight.same(&other.weight)
+            && self.pts.same(&other.pts)
+            && self.masters.same(&other.masters)
     }
 }
 
@@ -31,10 +37,21 @@ pub struct InterpPt {
 }
 
 #[derive(Clone)]
+pub struct Master {
+    pub weight: f64,
+}
+
+#[derive(Clone)]
 pub struct InterpSample {
     pub pt: Point,
     pub width: f64,
     pub weight: f64,
+}
+
+impl Data for Master {
+    fn same(&self, other: &Self) -> bool {
+        self.weight.same(&other.weight)
+    }
 }
 
 // All this should be produced by a derive macro.
@@ -42,10 +59,12 @@ pub mod lenses {
     // Discussion: if the inner type were listed first, then
     // the capitalization wouldn't have to be twizzled.
     pub mod calc_state {
-        use super::super::AppState;
+        use super::super::{AppState, Master};
         use druid::Lens;
+        use std::sync::Arc;
         pub struct Width;
         pub struct Weight;
+        pub struct Masters;
 
         impl Lens<AppState, f64> for Width {
             fn get<'a>(&self, data: &'a AppState) -> &'a f64 {
@@ -66,6 +85,29 @@ pub mod lenses {
                 f(&mut data.weight)
             }
         }
+
+        impl Lens<AppState, Arc<Vec<Master>>> for Masters {
+            fn get<'a>(&self, data: &'a AppState) -> &'a Arc<Vec<Master>> {
+                &data.masters
+            }
+
+            fn with_mut<V, F: FnOnce(&mut Arc<Vec<Master>>) -> V>(
+                &self,
+                data: &mut AppState,
+                f: F,
+            ) -> V {
+                f(&mut data.masters)
+            }
+        }
+    }
+}
+
+impl AppState {
+    pub fn add_new_master(&mut self) {
+        let mut masters = self.masters.deref().to_owned();
+        masters.push(Master { weight: self.weight });
+        self.masters = masters.into();
+        println!("adding new master");
     }
 }
 
