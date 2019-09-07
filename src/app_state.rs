@@ -105,7 +105,9 @@ pub mod lenses {
 impl AppState {
     pub fn add_new_master(&mut self) {
         let mut masters = self.masters.deref().to_owned();
-        masters.push(Master { weight: self.weight });
+        masters.push(Master {
+            weight: self.weight,
+        });
         self.masters = masters.into();
         println!("adding new master");
     }
