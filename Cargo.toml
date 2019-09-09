@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 druid = {git = "https://github.com/xi-editor/druid", rev = "6fc687e39f01a4f0aeda8cbbd919ccd28a9e9f34" }
-rbf-interp = "0.1.2"
+rbf-interp = "0.1.3"
 nalgebra = "0.18"

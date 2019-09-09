@@ -4,6 +4,7 @@ use druid::{LensWrap, UiMain, UiState, Widget};
 
 mod app_state;
 mod interp_pane;
+mod lens2;
 mod list;
 
 use app_state::{lenses, AppState, InterpPt, Master};
