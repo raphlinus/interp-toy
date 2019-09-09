@@ -24,8 +24,8 @@ impl Widget<AppState> for InterpPane {
         data: &AppState,
         _env: &Env,
     ) {
-        let width = data.width;
-        let weight = data.weight;
+        let width = data.shared.width;
+        let weight = data.shared.weight;
         for pt in data.pts.deref() {
             let interp = pt.eval(width, weight);
             let circle = Circle::new(interp, 5.0);
@@ -51,8 +51,8 @@ impl Widget<AppState> for InterpPane {
         data: &mut AppState,
         _env: &Env,
     ) -> Option<Action> {
-        let width = data.width;
-        let weight = data.weight;
+        let width = data.shared.width;
+        let weight = data.shared.weight;
         match event {
             Event::MouseDown(e) => {
                 println!("mouse down {:?}!", e);
@@ -77,7 +77,7 @@ impl Widget<AppState> for InterpPane {
             Event::MouseMoved(e) => {
                 if let Some(drag_ix) = self.drag_ix {
                     let mut pts = data.pts.deref().clone();
-                    pts[drag_ix].update(e.pos, data.width, data.weight);
+                    pts[drag_ix].update(e.pos, data.shared.width, data.shared.weight);
                     data.pts = Arc::new(pts);
                     ctx.invalidate();
                 }

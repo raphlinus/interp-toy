@@ -6,6 +6,7 @@ mod app_state;
 mod interp_pane;
 mod lens2;
 mod list;
+mod master;
 
 use app_state::{lenses, AppState, InterpPt, Master};
 use interp_pane::InterpPane;
@@ -29,13 +30,13 @@ fn build_ui() -> impl Widget<AppState> {
         ),
         0.0,
     );
-    let label = DynLabel::new(|data: &AppState, _env| format!("weight: {:.2}", data.weight));
+    let label = DynLabel::new(|data: &AppState, _env| format!("weight: {:.2}", data.shared.weight));
     col.add_child(Padding::uniform(5.0, label), 0.0);
     col.add_child(
         Padding::uniform(5.0, LensWrap::new(Slider::new(), lenses::calc_state::Width)),
         0.0,
     );
-    let label_wdth = DynLabel::new(|data: &AppState, _env| format!("width: {:.2}", data.width));
+    let label_wdth = DynLabel::new(|data: &AppState, _env| format!("width: {:.2}", data.shared.width));
     col.add_child(Padding::uniform(5.0, label_wdth), 0.0);
     let new_master_button = Button::new("New Master");
     let new_master_button = ActionWrapper::new(new_master_button, |data: &mut AppState, _env| {
@@ -50,7 +51,7 @@ fn build_ui() -> impl Widget<AppState> {
         .vertical(),
         1.0,
     );
-    let col = ActionWrapper::new(col, |data: &mut AppState, _env| data.width += 0.1);
+    let col = ActionWrapper::new(col, |data: &mut AppState, _env| data.shared.width += 0.1);
     let mut row = Row::new();
     row.add_child(pane, 2.0);
     row.add_child(col, 1.0);

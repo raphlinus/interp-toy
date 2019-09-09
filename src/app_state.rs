@@ -14,8 +14,7 @@ pub struct AppState {
     // TODO: increasingly aware that we're hardcoding two parameters,
     // this needs to be a variable number, but we're trying to keep
     // complexity down for now.
-    pub width: f64,
-    pub weight: f64,
+    pub shared: Shared,
 
     pub pts: Arc<Vec<InterpPt>>,
 
@@ -24,16 +23,28 @@ pub struct AppState {
 
 impl Data for AppState {
     fn same(&self, other: &AppState) -> bool {
-        self.width.same(&other.width)
-            && self.weight.same(&other.weight)
+        self.shared.same(&other.shared)
             && self.pts.same(&other.pts)
             && self.masters.same(&other.masters)
+    }
+}
+
+impl Data for Shared {
+    fn same(&self, other: &Shared) -> bool {
+        self.width.same(&other.width) && self.weight.same(&other.weight)
     }
 }
 
 #[derive(Clone)]
 pub struct InterpPt {
     samples: Vec<InterpSample>,
+}
+
+/// This is data that's made available to individual master entries
+#[derive(Clone, Default)]
+pub struct Shared {
+    pub width: f64,
+    pub weight: f64,
 }
 
 #[derive(Clone)]
@@ -66,23 +77,24 @@ pub mod lenses {
         pub struct Weight;
         pub struct Masters;
 
+        // Note: this lens isn't quite right.
         impl Lens<AppState, f64> for Width {
             fn get<'a>(&self, data: &'a AppState) -> &'a f64 {
-                &data.width
+                &data.shared.width
             }
 
             fn with_mut<V, F: FnOnce(&mut f64) -> V>(&self, data: &mut AppState, f: F) -> V {
-                f(&mut data.width)
+                f(&mut data.shared.width)
             }
         }
 
         impl Lens<AppState, f64> for Weight {
             fn get<'a>(&self, data: &'a AppState) -> &'a f64 {
-                &data.weight
+                &data.shared.weight
             }
 
             fn with_mut<V, F: FnOnce(&mut f64) -> V>(&self, data: &mut AppState, f: F) -> V {
-                f(&mut data.weight)
+                f(&mut data.shared.weight)
             }
         }
 
@@ -106,7 +118,7 @@ impl AppState {
     pub fn add_new_master(&mut self) {
         let mut masters = self.masters.deref().to_owned();
         masters.push(Master {
-            weight: self.weight,
+            weight: self.shared.weight,
         });
         self.masters = masters.into();
         println!("adding new master");

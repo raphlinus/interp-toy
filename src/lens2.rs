@@ -63,25 +63,28 @@ pub struct Pair<L1, L2> {
     lens2: L2,
 }
 
-impl<T: Data, U1: Data, U2: Data, L1: Lens2<T, U1>, L2: Lens2<T, U2>> Lens2<T, (U1, U2)> for Pair<L1, L2> {
-
+impl<T: Data, U1: Data, U2: Data, L1: Lens2<T, U1>, L2: Lens2<T, U2>> Lens2<T, (U1, U2)>
+    for Pair<L1, L2>
+{
     fn get<V, F: FnOnce(&(U1, U2)) -> V>(&self, data: &T, f: F) -> V {
-        self.lens1.get(data, |data1|
+        self.lens1.get(data, |data1| {
             self.lens2.get(data, |data2| {
                 let data = (data1.to_owned(), data2.to_owned());
                 f(&data)
-            }))
+            })
+        })
     }
 
     fn with_mut<V, F: FnOnce(&mut (U1, U2)) -> V>(&self, data: &mut T, f: F) -> V {
-        let ((data1, data2), val, delta1, delta2) = self.lens1.get(data, |data1|
+        let ((data1, data2), val, delta1, delta2) = self.lens1.get(data, |data1| {
             self.lens2.get(data, |data2| {
                 let mut data = (data1.to_owned(), data2.to_owned());
                 let val = f(&mut data);
                 let delta1 = data1.same(&data.0);
                 let delta2 = data2.same(&data.1);
                 (data, val, delta1, delta2)
-            }));
+            })
+        });
         if delta1 {
             self.lens1.with_mut(data, |d1| *d1 = data1);
         }
