@@ -69,12 +69,14 @@ impl Data for Master {
 pub mod lenses {
     // Discussion: if the inner type were listed first, then
     // the capitalization wouldn't have to be twizzled.
-    pub mod calc_state {
+    pub mod app_state {
         use super::super::{AppState, Master};
+        use crate::lens2::Lens2;
         use druid::Lens;
         use std::sync::Arc;
         pub struct Width;
         pub struct Weight;
+        pub struct Shared;
         pub struct Masters;
 
         // Note: this lens isn't quite right.
@@ -101,6 +103,34 @@ pub mod lenses {
         impl Lens<AppState, Arc<Vec<Master>>> for Masters {
             fn get<'a>(&self, data: &'a AppState) -> &'a Arc<Vec<Master>> {
                 &data.masters
+            }
+
+            fn with_mut<V, F: FnOnce(&mut Arc<Vec<Master>>) -> V>(
+                &self,
+                data: &mut AppState,
+                f: F,
+            ) -> V {
+                f(&mut data.masters)
+            }
+        }
+
+        impl Lens2<AppState, super::super::Shared> for Shared {
+            fn get<V, F: FnOnce(&super::super::Shared) -> V>(&self, data: &AppState, f: F) -> V {
+                f(&data.shared)
+            }
+
+            fn with_mut<V, F: FnOnce(&mut super::super::Shared) -> V>(
+                &self,
+                data: &mut AppState,
+                f: F,
+            ) -> V {
+                f(&mut data.shared)
+            }
+        }
+
+        impl Lens2<AppState, Arc<Vec<Master>>> for Masters {
+            fn get<V, F: FnOnce(&Arc<Vec<Master>>) -> V>(&self, data: &AppState, f: F) -> V {
+                f(&data.masters)
             }
 
             fn with_mut<V, F: FnOnce(&mut Arc<Vec<Master>>) -> V>(

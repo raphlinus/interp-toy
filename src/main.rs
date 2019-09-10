@@ -8,35 +8,27 @@ mod lens2;
 mod list;
 mod master;
 
-use app_state::{lenses, AppState, InterpPt, Master};
+use app_state::{lenses, AppState, InterpPt};
 use interp_pane::InterpPane;
+use lens2::{Lens2Wrap, Pair};
 use list::List;
-
-fn build_master_ui() -> impl Widget<Master> {
-    // Discussion: we might want spacing as a separate param for the list widget.
-    Padding::uniform(
-        3.0,
-        DynLabel::new(|data: &Master, _env| format!("weight {:.2}", data.weight)),
-    )
-}
+use master::MasterItem;
 
 fn build_ui() -> impl Widget<AppState> {
     let pane = InterpPane::default();
     let mut col = Column::new();
     col.add_child(
-        Padding::uniform(
-            5.0,
-            LensWrap::new(Slider::new(), lenses::calc_state::Weight),
-        ),
+        Padding::uniform(5.0, LensWrap::new(Slider::new(), lenses::app_state::Weight)),
         0.0,
     );
     let label = DynLabel::new(|data: &AppState, _env| format!("weight: {:.2}", data.shared.weight));
     col.add_child(Padding::uniform(5.0, label), 0.0);
     col.add_child(
-        Padding::uniform(5.0, LensWrap::new(Slider::new(), lenses::calc_state::Width)),
+        Padding::uniform(5.0, LensWrap::new(Slider::new(), lenses::app_state::Width)),
         0.0,
     );
-    let label_wdth = DynLabel::new(|data: &AppState, _env| format!("width: {:.2}", data.shared.width));
+    let label_wdth =
+        DynLabel::new(|data: &AppState, _env| format!("width: {:.2}", data.shared.width));
     col.add_child(Padding::uniform(5.0, label_wdth), 0.0);
     let new_master_button = Button::new("New Master");
     let new_master_button = ActionWrapper::new(new_master_button, |data: &mut AppState, _env| {
@@ -44,9 +36,9 @@ fn build_ui() -> impl Widget<AppState> {
     });
     col.add_child(Padding::uniform(5.0, new_master_button), 0.0);
     col.add_child(
-        Scroll::new(LensWrap::new(
-            List::new(|| Box::new(build_master_ui())),
-            lenses::calc_state::Masters,
+        Scroll::new(Lens2Wrap::new(
+            List::new(|| Box::new(MasterItem::new())),
+            Pair::new(lenses::app_state::Shared, lenses::app_state::Masters),
         ))
         .vertical(),
         1.0,

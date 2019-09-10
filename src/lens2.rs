@@ -58,9 +58,16 @@ pub trait Lens2<T, U> {
     fn with_mut<V, F: FnOnce(&mut U) -> V>(&self, data: &mut T, f: F) -> V;
 }
 
+// Discussion: it might be even better to make this a blanket impl for tuples.
 pub struct Pair<L1, L2> {
     lens1: L1,
     lens2: L2,
+}
+
+impl<L1, L2> Pair<L1, L2> {
+    pub fn new(lens1: L1, lens2: L2) -> Pair<L1, L2> {
+        Pair { lens1, lens2 }
+    }
 }
 
 impl<T: Data, U1: Data, U2: Data, L1: Lens2<T, U1>, L2: Lens2<T, U2>> Lens2<T, (U1, U2)>
@@ -80,8 +87,8 @@ impl<T: Data, U1: Data, U2: Data, L1: Lens2<T, U1>, L2: Lens2<T, U2>> Lens2<T, (
             self.lens2.get(data, |data2| {
                 let mut data = (data1.to_owned(), data2.to_owned());
                 let val = f(&mut data);
-                let delta1 = data1.same(&data.0);
-                let delta2 = data2.same(&data.1);
+                let delta1 = !data1.same(&data.0);
+                let delta2 = !data2.same(&data.1);
                 (data, val, delta1, delta2)
             })
         });
