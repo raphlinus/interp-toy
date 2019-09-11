@@ -20,7 +20,9 @@ impl MasterItem {
         // Discussion: we might want spacing as a separate param for the list widget.
         let child = Padding::uniform(
             3.0,
-            DynLabel::new(|data: &(Shared, Master), _env| format!("weight {:.2}", data.1.weight)),
+            DynLabel::new(|data: &(Shared, Master), _env| {
+                format!("weight {:.2} width {:.2}", data.1.weight, data.1.width)
+            }),
         );
         MasterItem {
             child: WidgetPod::new(child).boxed(),
@@ -62,6 +64,7 @@ impl Widget<(Shared, Master)> for MasterItem {
         match event {
             Event::MouseDown(_) => {
                 data.0.weight = data.1.weight;
+                data.0.width = data.1.width;
                 return None;
             }
             _ => (),

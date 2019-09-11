@@ -16,6 +16,15 @@ pub struct InterpPane {
     drag_ix: Option<usize>,
 }
 
+enum PtState {
+    /// Point is interpolated and can't be dragged.
+    Interpolated,
+    /// Point doesn't have a master at the current params, but params are at a master.
+    CanAddMaster,
+    /// Point has a master at the current params.
+    IsMaster,
+}
+
 impl Widget<AppState> for InterpPane {
     fn paint(
         &mut self,
@@ -26,10 +35,25 @@ impl Widget<AppState> for InterpPane {
     ) {
         let width = data.shared.width;
         let weight = data.shared.weight;
-        for pt in data.pts.deref() {
-            let interp = pt.eval(width, weight);
-            let circle = Circle::new(interp, 5.0);
-            let fg_color = Color::WHITE;
+        let pt_state = if data.is_at_master() {
+            PtState::CanAddMaster
+        } else {
+            PtState::Interpolated
+        };
+        for (i, pt) in data.pts.iter().enumerate() {
+            let fg_color = match pt_state {
+                PtState::CanAddMaster => Color::WHITE,
+                PtState::Interpolated => Color::WHITE.with_alpha(0.5),
+                _ => Color::rgb(0xff, 0, 0),
+            };
+            let is_selected = data.sel == Some(i);
+            let interp = pt.eval(width, weight, data.interp_type);
+            let radius = if is_selected {
+                6.0
+            } else {
+                5.0
+            };
+            let circle = Circle::new(interp, radius);
             paint_ctx.render_ctx.fill(circle, &fg_color);
         }
     }
@@ -59,13 +83,15 @@ impl Widget<AppState> for InterpPane {
                 let pos = e.pos;
                 let mut pts = data.pts.deref().clone();
                 for (i, pt) in pts.iter().enumerate() {
-                    let interp = pt.eval(width, weight);
+                    let interp = pt.eval(width, weight, data.interp_type);
                     if interp.distance(pos) < 5.0 {
                         self.drag_ix = Some(i);
+                        data.sel = Some(i);
                         return None;
                     }
                 }
                 self.drag_ix = Some(pts.len());
+                data.sel = self.drag_ix;
                 let pt = InterpPt::new(pos, width, weight);
                 pts.push(pt);
                 data.pts = Arc::new(pts);
