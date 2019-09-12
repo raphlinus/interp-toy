@@ -34,8 +34,9 @@ fn build_ui() -> impl Widget<AppState> {
     col.add_child(
         LensWrap::new(
             radio(vec![
-                (InterpType::ThinPlate, LocalizedString::new("Thin plate")),
                 (InterpType::Gaussian, LocalizedString::new("Gaussian")),
+                (InterpType::ThinPlate, LocalizedString::new("Thin plate")),
+                (InterpType::Linear, LocalizedString::new("Linear")),
             ]),
             lenses::app_state::InterpType,
         ),

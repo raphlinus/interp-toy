@@ -25,13 +25,14 @@ pub struct AppState {
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum InterpType {
-    ThinPlate,
     Gaussian,
+    ThinPlate,
+    Linear,
 }
 
 impl Default for InterpType {
     fn default() -> Self {
-        InterpType::ThinPlate
+        InterpType::Gaussian
     }
 }
 
@@ -222,12 +223,13 @@ impl InterpPt {
             centers.push(DVector::from_vec(vec![sample.width, sample.weight]));
             vals.push(DVector::from_vec(vec![sample.pt.x, sample.pt.y]));
         }
-        let basis = match interp_type {
-            InterpType::ThinPlate => Basis::PolyHarmonic(2),
+        let (basis, order) = match interp_type {
+            InterpType::ThinPlate => (Basis::PolyHarmonic(2), 2),
             // TODO: control over radius
-            InterpType::Gaussian => Basis::Gaussian(1.0),
+            InterpType::Gaussian => (Basis::Gaussian(1.0), 2),
+            InterpType::Linear => (Basis::PolyHarmonic(1), 1),
         };
-        let scatter = Scatter::create(centers, vals, basis, 2);
+        let scatter = Scatter::create(centers, vals, basis, order);
         let params = DVector::from_vec(vec![width, weight]);
         let interp = scatter.eval(params);
         Point::new(interp[0], interp[1])
