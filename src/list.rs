@@ -5,7 +5,7 @@ use std::sync::Arc;
 use druid::kurbo::{Point, Rect, Size};
 
 use druid::{
-    Action, BaseState, BoxConstraints, Data, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx,
+    BaseState, BoxConstraints, Data, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx,
     Widget, WidgetPod,
 };
 
@@ -65,13 +65,12 @@ impl<T: Data, F: FnMut() -> Box<dyn Widget<T>>> Widget<Arc<Vec<T>>> for List<T, 
         ctx: &mut EventCtx,
         data: &mut Arc<Vec<T>>,
         env: &Env,
-    ) -> Option<Action> {
-        let mut action = None;
+    ) {
         let mut new_data = Vec::with_capacity(data.len());
         let mut any_changed = false;
         for (child, child_data) in self.children.iter_mut().zip(data.iter()) {
             let mut d = child_data.to_owned();
-            action = Action::merge(action, child.event(event, ctx, &mut d, env));
+            child.event(event, ctx, &mut d, env);
             if !any_changed && !child_data.same(&d) {
                 any_changed = true;
             }
@@ -80,7 +79,6 @@ impl<T: Data, F: FnMut() -> Box<dyn Widget<T>>> Widget<Arc<Vec<T>>> for List<T, 
         if any_changed {
             *data = Arc::new(new_data);
         }
-        action
     }
 
     fn update(
@@ -155,15 +153,14 @@ impl<T1: Data, T: Data, F: FnMut() -> Box<dyn Widget<(T1, T)>>> Widget<(T1, Arc<
         ctx: &mut EventCtx,
         data: &mut (T1, Arc<Vec<T>>),
         env: &Env,
-    ) -> Option<Action> {
-        let mut action = None;
+    ) {
         let mut new_shared = data.0.to_owned();
         let mut new_data = Vec::with_capacity(data.1.len());
         let mut any_shared_changed = false;
         let mut any_el_changed = false;
         for (child, child_data) in self.children.iter_mut().zip(data.1.iter()) {
             let mut d = (new_shared.clone(), child_data.to_owned());
-            action = Action::merge(action, child.event(event, ctx, &mut d, env));
+            child.event(event, ctx, &mut d, env);
             if !any_shared_changed && !new_shared.same(&d.0) {
                 any_shared_changed = true;
             }
@@ -183,7 +180,6 @@ impl<T1: Data, T: Data, F: FnMut() -> Box<dyn Widget<(T1, T)>>> Widget<(T1, Arc<
         if any_el_changed {
             data.1 = Arc::new(new_data);
         }
-        action
     }
 
     fn update(

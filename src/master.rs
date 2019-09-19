@@ -3,7 +3,7 @@
 use druid::kurbo::{Point, Rect, Size};
 
 use druid::{
-    Action, BaseState, BoxConstraints, BoxedWidget, Env, Event, EventCtx, LayoutCtx, PaintCtx,
+    BaseState, BoxConstraints, BoxedWidget, Env, Event, EventCtx, LayoutCtx, PaintCtx,
     UpdateCtx, Widget, WidgetPod,
 };
 
@@ -60,16 +60,16 @@ impl Widget<(Shared, Master)> for MasterItem {
         ctx: &mut EventCtx,
         data: &mut (Shared, Master),
         env: &Env,
-    ) -> Option<Action> {
+    ) {
         match event {
             Event::MouseDown(_) => {
                 data.0.weight = data.1.weight;
                 data.0.width = data.1.width;
-                return None;
+                return;
             }
             _ => (),
         }
-        self.child.event(event, ctx, data, env)
+        self.child.event(event, ctx, data, env);
     }
 
     fn update(

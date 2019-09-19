@@ -4,7 +4,7 @@ use std::sync::Arc;
 use druid::kurbo::{Circle, Size};
 use druid::piet::{Color, RenderContext};
 use druid::{
-    Action, BaseState, BoxConstraints, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx, Widget,
+    BaseState, BoxConstraints, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx, Widget,
 };
 
 use crate::AppState;
@@ -74,7 +74,7 @@ impl Widget<AppState> for InterpPane {
         ctx: &mut EventCtx,
         data: &mut AppState,
         _env: &Env,
-    ) -> Option<Action> {
+    ) {
         let width = data.shared.width;
         let weight = data.shared.weight;
         match event {
@@ -87,7 +87,7 @@ impl Widget<AppState> for InterpPane {
                     if interp.distance(pos) < 5.0 {
                         self.drag_ix = Some(i);
                         data.sel = Some(i);
-                        return None;
+                        return;
                     }
                 }
                 self.drag_ix = Some(pts.len());
@@ -110,7 +110,6 @@ impl Widget<AppState> for InterpPane {
             }
             _ => (),
         }
-        None
     }
 
     fn update(
