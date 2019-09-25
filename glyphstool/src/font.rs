@@ -15,6 +15,7 @@ use crate::to_plist::ToPlist;
 #[derive(Debug, FromPlist, ToPlist)]
 pub struct Font {
     pub glyphs: Vec<Glyph>,
+    pub font_master: Vec<FontMaster>,
     #[rest]
     pub other_stuff: HashMap<String, Plist>,
 }
@@ -77,6 +78,24 @@ pub struct Anchor {
 pub struct GuideLine {
     pub angle: Option<f64>,
     pub position: Point,
+}
+
+#[derive(Debug, FromPlist, ToPlist)]
+pub struct FontMaster {
+    pub id: String,
+    pub weight_value: i64,
+}
+
+impl Font {
+    pub fn load(path: &std::path::Path) -> Result<Font, String> {
+        let contents = std::fs::read_to_string(path).map_err(|e| format!("{:?}", e))?;
+        let plist = Plist::parse(&contents).map_err(|e| format!("{:?}", e))?;
+        Ok(FromPlist::from_plist(plist))
+    }
+
+    pub fn get_glyph(&self, glyphname: &str) -> Option<&Glyph> {
+        self.glyphs.iter().find(|g| g.glyphname == glyphname)
+    }
 }
 
 impl FromPlist for Node {

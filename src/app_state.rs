@@ -58,9 +58,9 @@ impl Data for Shared {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct InterpPt {
-    samples: Vec<InterpSample>,
+    pub samples: Vec<InterpSample>,
 }
 
 /// This is data that's made available to individual master entries
@@ -204,6 +204,15 @@ impl AppState {
         self.masters
             .iter()
             .any(|master| self.shared.width == master.width && self.shared.weight == master.weight)
+    }
+
+    pub fn add_weight(&mut self, weight: f64) {
+        let master = Master { width: 0.0, weight };
+        Arc::make_mut(&mut self.masters).push(master);
+    }
+
+    pub fn set_pts(&mut self, pts: Vec<InterpPt>) {
+        *Arc::make_mut(&mut self.pts) = pts;
     }
 }
 

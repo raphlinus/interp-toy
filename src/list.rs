@@ -5,8 +5,8 @@ use std::sync::Arc;
 use druid::kurbo::{Point, Rect, Size};
 
 use druid::{
-    BaseState, BoxConstraints, Data, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx,
-    Widget, WidgetPod,
+    BaseState, BoxConstraints, Data, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx, Widget,
+    WidgetPod,
 };
 
 pub struct List<T: Data, F: FnMut() -> Box<dyn Widget<T>>> {
@@ -59,13 +59,7 @@ impl<T: Data, F: FnMut() -> Box<dyn Widget<T>>> Widget<Arc<Vec<T>>> for List<T, 
         bc.constrain(Size::new(width, y))
     }
 
-    fn event(
-        &mut self,
-        event: &Event,
-        ctx: &mut EventCtx,
-        data: &mut Arc<Vec<T>>,
-        env: &Env,
-    ) {
+    fn event(&mut self, event: &Event, ctx: &mut EventCtx, data: &mut Arc<Vec<T>>, env: &Env) {
         let mut new_data = Vec::with_capacity(data.len());
         let mut any_changed = false;
         for (child, child_data) in self.children.iter_mut().zip(data.iter()) {

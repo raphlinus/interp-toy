@@ -33,7 +33,7 @@ fn main() {
     */
     let mut font: Font = FromPlist::from_plist(plist);
     //println!("{:?}", font);
-    stretch::stretch(&mut font, 0.5, "051EFAE4-8BBE-4FBB-A016-4335C3E52F59");
+    stretch(&mut font, 0.5, "051EFAE4-8BBE-4FBB-A016-4335C3E52F59");
     let plist = font.to_plist();
     println!("{}", plist.to_string());
 }

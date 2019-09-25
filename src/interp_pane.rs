@@ -48,11 +48,7 @@ impl Widget<AppState> for InterpPane {
             };
             let is_selected = data.sel == Some(i);
             let interp = pt.eval(width, weight, data.interp_type);
-            let radius = if is_selected {
-                6.0
-            } else {
-                5.0
-            };
+            let radius = if is_selected { 6.0 } else { 5.0 };
             let circle = Circle::new(interp, radius);
             paint_ctx.render_ctx.fill(circle, &fg_color);
         }
@@ -68,13 +64,7 @@ impl Widget<AppState> for InterpPane {
         bc.constrain((100.0, 100.0))
     }
 
-    fn event(
-        &mut self,
-        event: &Event,
-        ctx: &mut EventCtx,
-        data: &mut AppState,
-        _env: &Env,
-    ) {
+    fn event(&mut self, event: &Event, ctx: &mut EventCtx, data: &mut AppState, _env: &Env) {
         let width = data.shared.width;
         let weight = data.shared.weight;
         match event {

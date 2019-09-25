@@ -3,8 +3,8 @@
 use druid::kurbo::{Point, Rect, Size};
 
 use druid::{
-    BaseState, BoxConstraints, BoxedWidget, Env, Event, EventCtx, LayoutCtx, PaintCtx,
-    UpdateCtx, Widget, WidgetPod,
+    BaseState, BoxConstraints, BoxedWidget, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx,
+    Widget, WidgetPod,
 };
 
 use druid::widget::{DynLabel, Padding};
@@ -54,13 +54,7 @@ impl Widget<(Shared, Master)> for MasterItem {
         size
     }
 
-    fn event(
-        &mut self,
-        event: &Event,
-        ctx: &mut EventCtx,
-        data: &mut (Shared, Master),
-        env: &Env,
-    ) {
+    fn event(&mut self, event: &Event, ctx: &mut EventCtx, data: &mut (Shared, Master), env: &Env) {
         match event {
             Event::MouseDown(_) => {
                 data.0.weight = data.1.weight;

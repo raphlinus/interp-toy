@@ -20,8 +20,7 @@ use std::marker::PhantomData;
 use druid::kurbo::Size;
 
 use druid::{
-    BaseState, BoxConstraints, Data, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx,
-    Widget,
+    BaseState, BoxConstraints, Data, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx, Widget,
 };
 
 /// A lens is a datatype that gives access to a part of a larger
@@ -163,13 +162,7 @@ where
         self.lens.get(data, |data| inner.layout(ctx, bc, data, env))
     }
 
-    fn event(
-        &mut self,
-        event: &Event,
-        ctx: &mut EventCtx,
-        data: &mut T,
-        env: &Env,
-    ) {
+    fn event(&mut self, event: &Event, ctx: &mut EventCtx, data: &mut T, env: &Env) {
         let inner = &mut self.inner;
         self.lens
             .with_mut(data, |data| inner.event(event, ctx, data, env));

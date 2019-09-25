@@ -1,5 +1,30 @@
+use std::collections::HashMap;
+use std::path::PathBuf;
+
+use kurbo::Affine;
+
 use druid::widget::{Button, Column, DynLabel, Padding, RadioGroup, Row, Scroll, Slider};
 use druid::{AppLauncher, LensWrap, LocalizedString, Widget, WindowDesc};
+
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+enum Cmd {
+    /// Show a blank window, add points manually.
+    Blank,
+    /// Load a glyph from a font.
+    Glyph(GlyphCmd),
+}
+
+#[derive(Debug, StructOpt)]
+struct GlyphCmd {
+    /// A font file in Glyphs format.
+    #[structopt(parse(from_os_str))]
+    input: PathBuf,
+
+    /// The name of the glyph to read.
+    glyph: String,
+}
 
 mod app_state;
 mod interp_pane;
@@ -7,7 +32,9 @@ mod lens2;
 mod list;
 mod master;
 
-use app_state::{lenses, AppState, InterpPt, InterpType};
+use glyphstool::Font;
+
+use app_state::{lenses, AppState, InterpPt, InterpSample, InterpType};
 use interp_pane::InterpPane;
 use lens2::{Lens2Wrap, Pair};
 use list::List;
@@ -58,8 +85,54 @@ fn build_ui() -> impl Widget<AppState> {
     row
 }
 
+fn set_app_state_for_glyph(app_state: &mut AppState, font: &Font, glyphname: &str) {
+    let a = Affine::new([0.5, 0.0, 0.0, -0.5, 0.0, 500.0]);
+    let mut weight_map = HashMap::new();
+    for master in &font.font_master {
+        let weight = (master.weight_value - 200) as f64 / 700.0;
+        weight_map.insert(master.id.clone(), weight);
+        app_state.add_weight(weight);
+    }
+    if let Some(glyph) = font.get_glyph(glyphname) {
+        let mut pts = Vec::new();
+        for layer in &glyph.layers {
+            if let Some(&weight) = weight_map.get(&layer.layer_id) {
+                let mut i = 0;
+                for p in layer.paths.as_ref().unwrap() {
+                    for n in &p.nodes {
+                        if i == pts.len() {
+                            pts.push(InterpPt::default());
+                        }
+                        let sample = InterpSample {
+                            pt: a * n.pt,
+                            weight,
+                            width: 0.0,
+                        };
+                        pts[i].samples.push(sample);
+                        i += 1;
+                    }
+                }
+            }
+        }
+        app_state.set_pts(pts);
+    }
+}
+
 fn main() {
-    let app_state = AppState::default();
+    let cmd = Cmd::from_args();
+
+    let mut app_state = AppState::default();
+    match cmd {
+        Cmd::Glyph(g) => {
+            println!("loading glyph {} from file {:?}", g.glyph, g.input);
+            let font = Font::load(&g.input).unwrap();
+            set_app_state_for_glyph(&mut app_state, &font, &g.glyph);
+            println!("masters: {:?}", font.font_master);
+        }
+        Cmd::Blank => {
+            println!("blank app");
+        }
+    }
     let title = LocalizedString::new("Interpolation toy");
     let window = WindowDesc::new(build_ui).title(title);
     AppLauncher::with_window(window)
