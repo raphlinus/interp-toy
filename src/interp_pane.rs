@@ -1,7 +1,9 @@
 use std::ops::Deref;
 use std::sync::Arc;
 
-use druid::kurbo::{Circle, Size};
+use glyphstool::NodeType;
+
+use druid::kurbo::{BezPath, Circle, Point, Size};
 use druid::piet::{Color, RenderContext};
 use druid::{
     BaseState, BoxConstraints, Env, Event, EventCtx, LayoutCtx, PaintCtx, UpdateCtx, Widget,
@@ -25,6 +27,36 @@ enum PtState {
     IsMaster,
 }
 
+fn reconstruct_path(pts: &[Point], structure: &[Vec<NodeType>]) -> BezPath {
+    let mut bez_path = BezPath::new();
+    let mut j = 0;
+    for subpath in structure {
+        let mut start_ix = 0;
+        while subpath[start_ix] == NodeType::OffCurve {
+            start_ix += 1;
+        }
+        let n = subpath.len();
+        bez_path.move_to(pts[j + start_ix]);
+        let mut ctrl_pts = Vec::with_capacity(2);
+        for i in 0..n {
+            let ix = (start_ix + i + 1) % n;
+            let node_type = subpath[ix];
+            let p = pts[j + ix];
+            match node_type {
+                NodeType::Line => bez_path.line_to(p),
+                NodeType::OffCurve => ctrl_pts.push(p),
+                NodeType::Curve | NodeType::CurveSmooth => {
+                    bez_path.curve_to(ctrl_pts[0], ctrl_pts[1], p);
+                    ctrl_pts.clear();
+                }
+            }
+        }
+        bez_path.close_path();
+        j += n;
+    }
+    bez_path
+}
+
 impl Widget<AppState> for InterpPane {
     fn paint(
         &mut self,
@@ -40,17 +72,25 @@ impl Widget<AppState> for InterpPane {
         } else {
             PtState::Interpolated
         };
-        for (i, pt) in data.pts.iter().enumerate() {
+        let pts: Vec<_> = data
+            .pts
+            .iter()
+            .map(|pt| pt.eval(width, weight, data.interp_type))
+            .collect();
+        let fill_color = Color::WHITE;
+        let path = reconstruct_path(&pts, &data.structure);
+        paint_ctx.fill(path, &fill_color);
+        for i in 0..pts.len() {
             let fg_color = match pt_state {
-                PtState::CanAddMaster => Color::WHITE,
-                PtState::Interpolated => Color::WHITE.with_alpha(0.5),
+                PtState::CanAddMaster => Color::rgb8(0x80, 0x80, 0xff),
+                PtState::Interpolated => Color::rgb8(0x80, 0x80, 0xff).with_alpha(0.8),
                 _ => Color::rgb(0xff, 0, 0),
             };
             let is_selected = data.sel == Some(i);
-            let interp = pt.eval(width, weight, data.interp_type);
-            let radius = if is_selected { 6.0 } else { 5.0 };
+            let interp = pts[i];
+            let radius = if is_selected { 3.0 } else { 2.0 };
             let circle = Circle::new(interp, radius);
-            paint_ctx.render_ctx.fill(circle, &fg_color);
+            paint_ctx.fill(circle, &fg_color);
         }
     }
 

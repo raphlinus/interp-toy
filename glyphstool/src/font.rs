@@ -52,7 +52,7 @@ pub struct Node {
     pub node_type: NodeType,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum NodeType {
     Line,
     OffCurve,

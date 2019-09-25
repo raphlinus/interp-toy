@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use nalgebra::DVector;
 
+use glyphstool::NodeType;
 use rbf_interp::{Basis, Scatter};
 
 use druid::kurbo::Point;
@@ -21,6 +22,8 @@ pub struct AppState {
 
     pub masters: Arc<Vec<Master>>,
     pub interp_type: InterpType,
+
+    pub structure: Arc<Vec<Vec<NodeType>>>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -43,6 +46,7 @@ impl Data for AppState {
             && self.pts.same(&other.pts)
             && self.masters.same(&other.masters)
             && self.interp_type.same(&other.interp_type)
+            && self.structure.same(&other.structure)
     }
 }
 
@@ -213,6 +217,10 @@ impl AppState {
 
     pub fn set_pts(&mut self, pts: Vec<InterpPt>) {
         *Arc::make_mut(&mut self.pts) = pts;
+    }
+
+    pub fn set_structure(&mut self, structure: Vec<Vec<NodeType>>) {
+        *Arc::make_mut(&mut self.structure) = structure;
     }
 }
 

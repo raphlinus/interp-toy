@@ -94,12 +94,20 @@ fn set_app_state_for_glyph(app_state: &mut AppState, font: &Font, glyphname: &st
         app_state.add_weight(weight);
     }
     if let Some(glyph) = font.get_glyph(glyphname) {
+        let mut structure = Vec::new();
+        let mut first_layer = true;
         let mut pts = Vec::new();
         for layer in &glyph.layers {
             if let Some(&weight) = weight_map.get(&layer.layer_id) {
                 let mut i = 0;
                 for p in layer.paths.as_ref().unwrap() {
+                    if first_layer {
+                        structure.push(Vec::new());
+                    }
                     for n in &p.nodes {
+                        if first_layer {
+                            structure.last_mut().unwrap().push(n.node_type);
+                        }
                         if i == pts.len() {
                             pts.push(InterpPt::default());
                         }
@@ -113,8 +121,10 @@ fn set_app_state_for_glyph(app_state: &mut AppState, font: &Font, glyphname: &st
                     }
                 }
             }
+            first_layer = false;
         }
         app_state.set_pts(pts);
+        app_state.set_structure(structure);
     }
 }
 
