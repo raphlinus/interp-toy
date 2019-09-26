@@ -1,0 +1,21 @@
+Hi. This is Raph Levien, and today I'd like to show you some ideas I've been working on, about how to make smoother interpolation for variable fonts.
+
+The current variable font format is based on linear interpolation, and that works well for things like adjusting the width and weight of a font, because the motion of the control points is close to linear as the parameters are adjusted. But for things like rotations, it starts falling apart.
+
+Today I'll show two examples of rotation in variable fonts. One is rotating the dot on the /i by 90 degrees, and the other is morphing between a normal and italic shape of an /n, with a nice tail on the italic form.
+
+Here I've got the font file open in Glyphs, which is the tool I used to draw the masters. The dot of the /i is rotating, but it's also getting smaller as it's interpolating. What's going wrong?
+
+To show you, I'll open up the glyph in my "interpolation toy". This is basically my testbed for ideas about interpolation. There are a few interesting things about it. It's written in Rust and it uses the new druid UI toolkit. The way I have it set up right now, it opens a Glyphs font file, and lets you play with the interpolation parameters.
+
+So here I'm sliding the axis back and forth, and you can see what's going on. The motion of each point is a straight line, and that makes the dot smaller in the middle of the range. We have to specify more than just the two endpoints, to have better control over the motion.
+
+The basic way to do that is to add another master, right in the middle. Here I have a version of the font with three masters. It's better, but there are still problems with the dot getting smaller. Let's look at that in the interpolation toy. I'll start with linear interpolation, which is how variable fonts work now. And you can see the problem - the error is not as much, but the motion is still linear between the masters. It would be cooler, wouldn't it, if we could get nice, smooth motion instead.
+
+Now I'll select Gaussian interpolation, and let's see what happens. Nice. In the description is a link to a document I wrote about radial basis functions for interpolation, but the basic idea is simple; it's smoothing it out, using similar underlying math as Gaussian blur for images.
+
+Just rotating a square shows what's going on pretty clearly, but maybe isn't something you'd do in a real font. So here's another example. We want to go from an upright /n to an italic. With just two masters, it's pretty horrible - it gets distorted. So we'll pull up a version with a third master, also drawn in Glyphs, and take a look. Here are the three masters.
+
+With linear interpolation, it's ok, but not great. The terminal is getting smaller when it interpolates between the masters, for the same reason the dot on the /i got smaller - it's a rotational movement. So let's try it with Gaussian interpolation. Very smooth movement, and in particular, a nice smooth rotation of that terminal, blended with the rest of the glyph.
+
+I'm going to continue working on these ideas, but wanted to show you what I had now, as I'm pretty excited. The goal of this work is to produce better quality results, with less effort, because you'll need fewer masters. I hope what I've shown you today gets you interested in the potential for these techniques, and the tools we're building. Thanks for watching!
