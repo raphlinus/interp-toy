@@ -1,13 +1,58 @@
 use std::env;
 use std::fs;
+use std::path::{Path, PathBuf};
 
-use glyphstool::{stretch, Font, FromPlist, Plist, ToPlist};
+use structopt::StructOpt;
+
+#[derive(StructOpt, Debug)]
+enum Cmd {
+    Merge(MergeCmd)
+}
+
+#[derive(StructOpt, Debug)]
+struct MergeCmd {
+    /// The font file to merge in.
+    #[structopt(parse(from_os_str))]
+    font: PathBuf,
+
+    /// The other font file, to use as a source.
+    #[structopt(parse(from_os_str))]
+    other: PathBuf,
+
+    /// The layer to merge (UUID).
+    layer: String,
+}
+
+use glyphstool::{ops, stretch, Font, FromPlist, Plist, ToPlist};
 
 fn usage() {
     eprintln!("usage: glyphstool font.glyphs");
 }
 
+fn read_font(path: &Path) -> Font {
+    let contents = fs::read_to_string(path).expect("error reading font file");
+    let plist = Plist::parse(&contents).expect("error parsing font file");
+    FromPlist::from_plist(plist)
+}
+
+fn write_font(path: &Path, font: Font) {
+    let plist = font.to_plist();
+    fs::write(path, &plist.to_string());
+}
+
 fn main() {
+    let cmd = Cmd::from_args();
+
+    match cmd {
+        Cmd::Merge(m) => {
+            println!("merge {:?}", m);
+            let mut font = read_font(&m.font);
+            let other = read_font(&m.other);
+            ops::merge(&mut font, &other, &m.layer);
+            write_font(&m.font, font);
+        }
+    }
+    /*
     let mut filename = None;
     for arg in env::args().skip(1) {
         if filename.is_none() {
@@ -36,4 +81,5 @@ fn main() {
     stretch(&mut font, 0.5, "051EFAE4-8BBE-4FBB-A016-4335C3E52F59");
     let plist = font.to_plist();
     println!("{}", plist.to_string());
+    */
 }

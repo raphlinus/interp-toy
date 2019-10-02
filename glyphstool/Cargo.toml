@@ -13,3 +13,6 @@ name = "glyphstool"
 [dependencies]
 kurbo = "0.5.1"
 plist_derive = { path = "plist_derive" }
+
+# This dep is used for the binary, not the lib, but oh well.
+structopt = "0.3.2"

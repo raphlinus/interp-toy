@@ -44,16 +44,28 @@ fn is_alnum_strict(b: u8) -> bool {
     is_alnum(b) && b != b'-'
 }
 
+fn is_ascii_digit(b: u8) -> bool {
+    b >= b'0' && b <= b'9'
+}
+
+fn is_hex_upper(b: u8) -> bool {
+    (b >= b'0' && b <= b'9') || (b >= b'A' && b <= b'F')
+}
+
 fn is_ascii_whitespace(b: u8) -> bool {
     b == b' ' || b == b'\t' || b == b'\r' || b == b'\n'
 }
 
 fn numeric_ok(s: &str) -> bool {
+    let s = s.as_bytes();
     if s.is_empty() {
         return false;
     }
-    if s.len() > 1 && s.as_bytes()[0] == b'0' {
-        return !s.as_bytes().iter().all(|&b| b >= b'0' && b <= b'9');
+    if s.iter().all(|&b| is_hex_upper(b)) && !s.iter().all(|&b| is_ascii_digit(b)) {
+        return false;
+    }
+    if s.len() > 1 && s[0] == b'0' {
+        return !s.iter().all(|&b| is_ascii_digit(b));
     }
     true
 }

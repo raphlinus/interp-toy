@@ -28,7 +28,7 @@ pub struct Glyph {
     pub other_stuff: HashMap<String, Plist>,
 }
 
-#[derive(Debug, FromPlist, ToPlist)]
+#[derive(Clone, Debug, FromPlist, ToPlist)]
 pub struct Layer {
     pub layer_id: String,
     pub width: f64,
@@ -40,13 +40,13 @@ pub struct Layer {
     pub other_stuff: HashMap<String, Plist>,
 }
 
-#[derive(Debug, FromPlist, ToPlist)]
+#[derive(Clone, Debug, FromPlist, ToPlist)]
 pub struct Path {
     pub closed: bool,
     pub nodes: Vec<Node>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Node {
     pub pt: Point,
     pub node_type: NodeType,
@@ -55,12 +55,13 @@ pub struct Node {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum NodeType {
     Line,
+    LineSmooth,
     OffCurve,
     Curve,
     CurveSmooth,
 }
 
-#[derive(Debug, FromPlist, ToPlist)]
+#[derive(Clone, Debug, FromPlist, ToPlist)]
 pub struct Component {
     pub name: String,
     pub transform: Option<Affine>,
@@ -68,13 +69,13 @@ pub struct Component {
     pub other_stuff: HashMap<String, Plist>,
 }
 
-#[derive(Debug, FromPlist, ToPlist)]
+#[derive(Clone, Debug, FromPlist, ToPlist)]
 pub struct Anchor {
     pub name: String,
     pub position: Point,
 }
 
-#[derive(Debug, FromPlist, ToPlist)]
+#[derive(Clone, Debug, FromPlist, ToPlist)]
 pub struct GuideLine {
     pub angle: Option<f64>,
     pub position: Point,
@@ -84,6 +85,8 @@ pub struct GuideLine {
 pub struct FontMaster {
     pub id: String,
     pub weight_value: i64,
+    #[rest]
+    pub other_stuff: HashMap<String, Plist>,
 }
 
 impl Font {
@@ -100,7 +103,7 @@ impl Font {
 
 impl FromPlist for Node {
     fn from_plist(plist: Plist) -> Self {
-        let mut spl = plist.as_str().unwrap().split(' ');
+        let mut spl = plist.as_str().unwrap().splitn(3, ' ');
         let x = spl.next().unwrap().parse().unwrap();
         let y = spl.next().unwrap().parse().unwrap();
         let pt = Point::new(x, y);
@@ -114,6 +117,7 @@ impl std::str::FromStr for NodeType {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "LINE" => Ok(NodeType::Line),
+            "LINE SMOOTH" => Ok(NodeType::LineSmooth),
             "OFFCURVE" => Ok(NodeType::OffCurve),
             "CURVE" => Ok(NodeType::Curve),
             "CURVE SMOOTH" => Ok(NodeType::CurveSmooth),
@@ -126,6 +130,7 @@ impl NodeType {
     fn glyphs_str(&self) -> &'static str {
         match self {
             NodeType::Line => "LINE",
+            NodeType::LineSmooth => "LINE SMOOTH",
             NodeType::OffCurve => "OFFCURVE",
             NodeType::Curve => "CURVE",
             NodeType::CurveSmooth => "CURVE SMOOTH",

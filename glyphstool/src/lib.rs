@@ -2,6 +2,7 @@
 
 mod font;
 mod from_plist;
+pub mod ops;
 mod plist;
 mod stretch;
 mod to_plist;
