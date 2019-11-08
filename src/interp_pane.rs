@@ -43,7 +43,7 @@ fn reconstruct_path(pts: &[Point], structure: &[Vec<NodeType>]) -> BezPath {
             let node_type = subpath[ix];
             let p = pts[j + ix];
             match node_type {
-                NodeType::Line => bez_path.line_to(p),
+                NodeType::Line | NodeType::LineSmooth => bez_path.line_to(p),
                 NodeType::OffCurve => ctrl_pts.push(p),
                 NodeType::Curve | NodeType::CurveSmooth => {
                     bez_path.curve_to(ctrl_pts[0], ctrl_pts[1], p);

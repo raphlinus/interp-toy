@@ -85,6 +85,7 @@ pub struct GuideLine {
 pub struct FontMaster {
     pub id: String,
     pub weight_value: i64,
+    pub width_value: Option<i64>,
     #[rest]
     pub other_stuff: HashMap<String, Plist>,
 }
@@ -98,6 +99,12 @@ impl Font {
 
     pub fn get_glyph(&self, glyphname: &str) -> Option<&Glyph> {
         self.glyphs.iter().find(|g| g.glyphname == glyphname)
+    }
+}
+
+impl Glyph {
+    pub fn get_layer(&self, layer_id: &str) -> Option<&Layer> {
+        self.layers.iter().find(|l| l.layer_id == layer_id)
     }
 }
 

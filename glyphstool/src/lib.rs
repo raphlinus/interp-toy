@@ -7,7 +7,7 @@ mod plist;
 mod stretch;
 mod to_plist;
 
-pub use font::{Font, NodeType};
+pub use font::{Font, Glyph, Layer, Node, NodeType, Path};
 pub use from_plist::FromPlist;
 pub use plist::Plist;
 pub use stretch::stretch;

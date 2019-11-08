@@ -1,12 +1,14 @@
-use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use structopt::StructOpt;
 
+mod inco_fix;
+
 #[derive(StructOpt, Debug)]
 enum Cmd {
-    Merge(MergeCmd)
+    Merge(MergeCmd),
+    IncoFix(IncoFixCmd),
 }
 
 #[derive(StructOpt, Debug)]
@@ -21,6 +23,13 @@ struct MergeCmd {
 
     /// The layer to merge (UUID).
     layer: String,
+}
+
+#[derive(StructOpt, Debug)]
+struct IncoFixCmd {
+    /// The font file to operate on.
+    #[structopt(parse(from_os_str))]
+    font: PathBuf,
 }
 
 use glyphstool::{ops, stretch, Font, FromPlist, Plist, ToPlist};
@@ -49,6 +58,11 @@ fn main() {
             let mut font = read_font(&m.font);
             let other = read_font(&m.other);
             ops::merge(&mut font, &other, &m.layer);
+            write_font(&m.font, font);
+        }
+        Cmd::IncoFix(m) => {
+            let mut font = read_font(&m.font);
+            inco_fix::inco_fix(&mut font);
             write_font(&m.font, font);
         }
     }
