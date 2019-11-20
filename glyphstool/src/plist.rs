@@ -256,8 +256,10 @@ impl Plist {
             }
             Plist::Dictionary(a) => {
                 s.push_str("{\n");
-                // TODO: probably want to sort keys
-                for (k, el) in a {
+                let mut keys: Vec<_> = a.keys().collect();
+                keys.sort();
+                for k in keys {
+                    let el = &a[k];
                     // TODO: quote if needed?
                     escape_string(s, k);
                     s.push_str(" = ");

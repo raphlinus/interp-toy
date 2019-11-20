@@ -20,7 +20,7 @@ pub struct Font {
     pub other_stuff: HashMap<String, Plist>,
 }
 
-#[derive(Debug, FromPlist, ToPlist)]
+#[derive(Clone, Debug, FromPlist, ToPlist)]
 pub struct Glyph {
     pub layers: Vec<Layer>,
     pub glyphname: String,
@@ -99,6 +99,10 @@ impl Font {
 
     pub fn get_glyph(&self, glyphname: &str) -> Option<&Glyph> {
         self.glyphs.iter().find(|g| g.glyphname == glyphname)
+    }
+
+    pub fn get_glyph_mut(&mut self, glyphname: &str) -> Option<&mut Glyph> {
+        self.glyphs.iter_mut().find(|g| g.glyphname == glyphname)
     }
 }
 
@@ -191,5 +195,19 @@ impl FromPlist for Point {
 impl ToPlist for Point {
     fn to_plist(self) -> Plist {
         format!("{{{}, {}}}", self.x, self.y).into()
+    }
+}
+
+impl Path {
+    pub fn new(closed: bool) -> Path {
+        Path {
+            nodes: Vec::new(),
+            closed,
+        }
+    }
+
+    pub fn add(&mut self, pt: impl Into<Point>, node_type: NodeType) {
+        let pt = pt.into();
+        self.nodes.push(Node { pt, node_type });
     }
 }

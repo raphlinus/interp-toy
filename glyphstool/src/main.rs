@@ -9,6 +9,7 @@ mod inco_fix;
 enum Cmd {
     Merge(MergeCmd),
     IncoFix(IncoFixCmd),
+    IncoScale(IncoScaleCmd),
 }
 
 #[derive(StructOpt, Debug)]
@@ -30,6 +31,19 @@ struct IncoFixCmd {
     /// The font file to operate on.
     #[structopt(parse(from_os_str))]
     font: PathBuf,
+
+}
+
+#[derive(StructOpt, Debug)]
+struct IncoScaleCmd {
+    /// The font file to operate on.
+    #[structopt(parse(from_os_str))]
+    font: PathBuf,
+
+    /// Subcommand. 0: numerics. 1: ord.
+    ///
+    /// This should be an enum, but int is easier.
+    subcmd: i32,
 }
 
 use glyphstool::{ops, stretch, Font, FromPlist, Plist, ToPlist};
@@ -63,6 +77,11 @@ fn main() {
         Cmd::IncoFix(m) => {
             let mut font = read_font(&m.font);
             inco_fix::inco_fix(&mut font);
+            write_font(&m.font, font);
+        }
+        Cmd::IncoScale(m) => {
+            let mut font = read_font(&m.font);
+            inco_fix::inco_scale(&mut font, m.subcmd);
             write_font(&m.font, font);
         }
     }
