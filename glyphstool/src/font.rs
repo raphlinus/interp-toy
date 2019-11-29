@@ -210,4 +210,14 @@ impl Path {
         let pt = pt.into();
         self.nodes.push(Node { pt, node_type });
     }
+
+    /// Rotate left by one, placing the first point at the end. This is because
+    /// it's what glyphs seems to expect.
+    pub fn rotate_left(&mut self, delta: usize) {
+        self.nodes.rotate_left(delta);
+    }
+
+    pub fn reverse(&mut self) {
+        self.nodes.reverse();
+    }
 }

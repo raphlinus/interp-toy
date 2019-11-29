@@ -10,6 +10,7 @@ enum Cmd {
     Merge(MergeCmd),
     IncoFix(IncoFixCmd),
     IncoScale(IncoScaleCmd),
+    IncoSyms(IncoSymsCmd),
 }
 
 #[derive(StructOpt, Debug)]
@@ -31,7 +32,6 @@ struct IncoFixCmd {
     /// The font file to operate on.
     #[structopt(parse(from_os_str))]
     font: PathBuf,
-
 }
 
 #[derive(StructOpt, Debug)]
@@ -46,11 +46,14 @@ struct IncoScaleCmd {
     subcmd: i32,
 }
 
-use glyphstool::{ops, stretch, Font, FromPlist, Plist, ToPlist};
-
-fn usage() {
-    eprintln!("usage: glyphstool font.glyphs");
+#[derive(StructOpt, Debug)]
+struct IncoSymsCmd {
+    /// The font file to operate on.
+    #[structopt(parse(from_os_str))]
+    font: PathBuf,
 }
+
+use glyphstool::{ops, Font, FromPlist, Plist, ToPlist};
 
 fn read_font(path: &Path) -> Font {
     let contents = fs::read_to_string(path).expect("error reading font file");
@@ -60,7 +63,7 @@ fn read_font(path: &Path) -> Font {
 
 fn write_font(path: &Path, font: Font) {
     let plist = font.to_plist();
-    fs::write(path, &plist.to_string());
+    fs::write(path, &plist.to_string()).unwrap();
 }
 
 fn main() {
@@ -82,6 +85,11 @@ fn main() {
         Cmd::IncoScale(m) => {
             let mut font = read_font(&m.font);
             inco_fix::inco_scale(&mut font, m.subcmd);
+            write_font(&m.font, font);
+        }
+        Cmd::IncoSyms(m) => {
+            let mut font = read_font(&m.font);
+            inco_fix::inco_syms(&mut font);
             write_font(&m.font, font);
         }
     }
